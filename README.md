@@ -2,7 +2,7 @@
 
 GSPS is a really fucked up tool. GSPS is a local gentoo mirror and provisioning endpoint that's installed with GSPS. 
 
-Depending on your hardware, bootstrapping GSPS takes about 15-25 hours. Installs and provisioning are automated but usage still expects the user (literally just me) to have solid Gentoo fudnamentals. 
+Depending on your hardware, bootstrapping GSPS takes about 15-25 hours. Installs and provisioning are automated but usage still expects the user (literally just me) to have solid Gentoo fundamentals. 
 
 ## Overview
 
