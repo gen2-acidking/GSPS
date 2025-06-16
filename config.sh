@@ -2,9 +2,7 @@
 # GSPS Configuration File
 
 LOCAL_IP="192.168.122.38" # where nginx binds to
-PROVISIONER_IP="192.168.0.103"  # upstream GSPS for --copy mode
-
-# Directory configuration  
+PROVISIONER_IP="192.168.0.103"  # upstream GSPS for --copy mode 
 REPO_ROOT="$(pwd)" # where nginx serves files from
 
 # Mode conf

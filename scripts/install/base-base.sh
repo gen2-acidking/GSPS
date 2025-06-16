@@ -1,4 +1,6 @@
 #!/bin/bash
+# This script install Gentoo base system. Dont edit.
+# Edit the config file instead at configs/install/base-base.conf
 
 set -euo pipefail
 
@@ -9,7 +11,7 @@ if [[ $# -eq 0 ]]; then
     exit 1
 fi
 
-# Get absolute path of config file BEFORE sourcing
+
 CONFIG_ABSPATH="$(realpath "$1")"
 source "$CONFIG_ABSPATH"
 CONFIG_NAME=$(basename "$1" .conf)
@@ -172,7 +174,6 @@ echo "$USERNAME:$PASSWORD2" | chpasswd
 log "Base installation complete"
 CHROOT_EOF
 
-# Copy config using absolute path and make executable
 cp "$CONFIG_ABSPATH" /mnt/gentoo/config.conf
 if [[ -f genfstab ]]; then
     cp genfstab /mnt/gentoo/
@@ -183,7 +184,6 @@ chmod +x /mnt/gentoo/base-install.sh
 log "Entering chroot and running installation"
 chroot /mnt/gentoo ./base-install.sh
 
-# Unmount (from search results)
 umount -l /mnt/gentoo/dev{/shm,/pts,}
 umount -R /mnt/gentoo
 

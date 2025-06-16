@@ -1,4 +1,5 @@
 #!/bin/bash
+# Don't use yet just testing
 
 set -euo pipefail
 

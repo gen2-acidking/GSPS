@@ -1,5 +1,7 @@
 #!/bin/bash
-# provision.sh - Main provisioning entry point with dependency management
+
+# Main menu script. Here you select what to do and this script pulls
+# the necessary scripts from the provision server and executes them.
 
 set -euo pipefail
 
@@ -25,24 +27,22 @@ download_file() {
     fi
 }
 
+# When called with curl we need to install depenencies to 
+# target system and pass config file aswell 
 download_and_run() {
     local script_path="$1"
     local config_path="$2"
-    local deps="$3"  # Space-separated list of dependencies
-    
+    local deps="$3"
+
     mkdir -p "$SCRIPT_DIR"
     cd "$SCRIPT_DIR"
-    
-    # Download main script
     download_file "scripts/$script_path" "$(basename "$script_path")"
     chmod +x "$(basename "$script_path")"
-    
-    # Download config if specified
+
     if [[ -n "$config_path" ]]; then
         download_file "configs/$config_path" "$(basename "$config_path")"
     fi
-    
-    # Download dependencies
+
     if [[ -n "$deps" ]]; then
         log "Downloading dependencies: $deps"
         for dep in $deps; do
@@ -66,7 +66,6 @@ download_and_run() {
         done
     fi
     
-    # Execute script with config
     log "Executing $script_path"
     if [[ -n "$config_path" ]]; then
         "./$(basename "$script_path")" "$(basename "$config_path")"
@@ -174,5 +173,4 @@ EOF
     show_main_menu
 }
 
-# Start the menu system
 show_main_menu
