@@ -1,5 +1,5 @@
 # GSPS - Gentoo System Provisioning Server
-![Preview](https://github.com/gen2-acidking/GSPS/GSPS.png)
+![Preview](GSPS.png)
 
 GSPS is a really fucked up tool. GSPS is a local gentoo mirror and provisioning endpoint that's installed with GSPS. 
 
