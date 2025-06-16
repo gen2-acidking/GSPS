@@ -44,7 +44,7 @@ So heres what you got to do...
 
 ### Case 1: Bootstrap First GSPS (No Existing Server)
 
-Edit `scripts/install/base-base.sh` and `configs/install/base-base.config to use public Gentoo mirrors:
+Edit `scripts/install/base-base.sh` and `configs/install/base-base.config` to use public Gentoo mirrors:
 
 ```bash
 git clone https://github.com/gen2-acidking/GSPS
@@ -56,26 +56,26 @@ STAGE3_URL="https://distfiles.gentoo.org/releases/amd64/autobuilds/20250608T1653
 ```
 
 Then install:
+Edit `configs/install/base-base.conf` with Gentoo system configurations. The current configurations will produce a working system on a virtual machine. Change blockdev depending on your memory device. You might have to check this with `lslbk` 
 
 ```bash
-# This installs a minimal gentoo system
-# Might take a couple hours on bad hardware.
-git clone https://github.com/gen2-acidking/GSPS
+# this installs a minimal gentoo system
+# might take a couple hours on bad hardware.
 cd GSPS/
 chmod +x provision.sh
 ./provision.sh 
-# Choose: 1) Install Base -> 1) base-base
+# choose: 1) Install Base -> 1) base-base
 reboot
 
-# Clone the repo to your install aswell 
+# clone the repo to your install aswell 
 git clone https://github.com/gen2-acidking/GSPS
 cd GSPS/
 chmod +x init.sh
-# Depending on your internet/disk speeds about 15-25 hours
+# depending on your internet/disk speeds about 15-25 hours
 ./init.sh --create
 ```
 
-Later, revert mirror URLs to use the local GSPS server again. For the provisioning server it's [rsync or http]://localhost/<target>
+Later, revert mirror URLs to use the local GSPS server again. For the provisioning server it's [rsync or http]://localhost/[target]
 
 ### Case 2: You Already Have a Gentoo System
 
@@ -98,7 +98,7 @@ curl -fsSL http://gsps.local.address/provision.sh -o provision.sh
 chmod +x provision.sh
 ./provision.sh
 reboot
-# Choose: 1) Install Base -> 1) base-base
+# choose: 1) Install Base -> 1) base-base
 ```
 With install base option we can install base gentoo systems in the livecd, currently only on the gentoo livecd but if you make the 
 /mnt/gentoo folder yourself it should work.  
@@ -117,10 +117,10 @@ chmod +x init.sh
 ## Usage
 
 ```bash
-./init.sh --test         # Dry run, no downloads
-./init.sh --create       # Full setup (~600GB)
-./init.sh --copy         # Mirror existing provisioner
-./provision.sh           # Use the provisione
+./init.sh --test         # dry run, no downloads
+./init.sh --create       # full setup (~600GB)
+./init.sh --copy         # mirror existing provisioner
+./provision.sh           # use the provisioner
 ```
 
 ## Features
@@ -134,8 +134,8 @@ chmod +x init.sh
 
 ```
 /GSPS/gentoo-mirror/
-├── provision.sh
-├── init.sh
+├── provision.sh       # used to manage pakages on local systems
+├── init.sh            # used to bootstrap or install GSPS
 ├── scripts/
 │   ├── install/base-base.sh
 │   └── provision/{dwm,samba,provision}-*.sh
@@ -143,13 +143,12 @@ chmod +x init.sh
 │   └── install/base-base.conf
 ├── resources/
 │   ├── tools/genfstab
-│   ├── configs/
-│   ├── patches/
-│   └── packages/
-├── distfiles/
-├── portage/gentoo.git
-├── overlays/acidking/
-└── portage-rsync/
+│   ├── configs/       # doesn't exist yet
+│   ├── patches/       # doesn't exist yet
+│   └── packages/      # doesn't exist yet
+├── distfiles/         # configured during install
+├── portage/gentoo.git # configured during install
+└── portage-rsync/     # configured during install
 ```
 
 ## Served Endpoints
