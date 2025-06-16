@@ -4,6 +4,23 @@ GSPS is a really fucked up tool. GSPS is a local gentoo mirror and provisioning 
 
 Depending on your hardware, bootstrapping GSPS takes about 15-25 hours. Installs and provisioning are automated but usage still expects the user (literally just me) to have solid Gentoo fundamentals. 
 
+# GSPS Technology Stack
+
+## Core Operating System
+- **Gentoo Linux**
+
+## Web Server & Networking
+- **Nginx**
+- **fcgiwrap**
+
+## Version Control & Synchronization
+- **Git**
+- **rsync**
+
+## Package Management
+- **Portage**
+
+
 ## Overview
 
 With GSPS you can:
@@ -29,12 +46,11 @@ So heres what you got to do...
 Edit `scripts/install/base-base.sh` and `configs/install/base-base.config to use public Gentoo mirrors:
 
 ```bash
-cd
 git clone https://github.com/gen2-acidking/GSPS
 # Replace mirror URLs in base-base.sh
 GENTOO_MIRRORS="http://distfiles.gentoo.org rsync://rsync.gentoo.org/gentoo-distfiles"
 sync-uri = https://github.com/gentoo-mirror/gentoo.git
-# And make sure that in in configs/install/base-base.conf
+# And make sure that in configs/install/base-base.conf:
 STAGE3_URL="https://distfiles.gentoo.org/releases/amd64/autobuilds/20250608T165347Z/stage3-amd64-openrc-20250608T165347Z.tar.xz"
 ```
 
