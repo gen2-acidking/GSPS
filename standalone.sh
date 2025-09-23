@@ -1,4 +1,5 @@
 #!/bin/bash
+# Gentoo Linux Base Installation Script - Standalone, tested flow
 
 set -euo pipefail
 
@@ -12,47 +13,40 @@ USERNAME="acidking"
 PASSWORD="bep" # Root password
 PASSWORD2="bop" # User password
 TIMEZONE="Europe/Helsinki" # owo
-KEYMAP="colemak" # Keyboard layout, colemak
+KEYMAP="en-latin9" # Keyboard layout, colemak
 LOCALE="en_US.UTF-8 UTF-8"
+
+# Disk layout (tested)
 DISK="/dev/vda"
 ROOT_PART="/dev/vda3" # Hello virtual machine user! 
 EFI_PART="/dev/vda1"  # Are you scared of the dark?
 SWAP_PART="/dev/vda2" # ------------------------- #
 ROOT_SIZE="8GiB"
-EFI_SIZE="100MiB" # smol
+EFI_SIZE="100Mib" # smol (keep as tested)
 SWAP_SIZE="2GiB"
-MAX_JOBS="80" # Number of parallel jobs for emerge, 
-             # you're gonna need to ratchet this number down quite a bit :^)
 
-STAGE3_BASE_URL="https://distfiles.gentoo.org/releases/amd64/autobuilds"
+MAX_JOBS="80" # Number of parallel jobs for emerge
+
+# Fixed, tested stage3 tarball (no auto-detection)
+STAGE3_URL="https://distfiles.gentoo.org/releases/amd64/autobuilds/20250608T165347Z/stage3-amd64-openrc-20250608T165347Z.tar.xz"
 
 # ============================================================================
-# MAIN SCRIPT - DON'T TOUCH UNLESS YOU KNOW WHAT YOU'RE DOING
+# MAIN SCRIPT
 # ============================================================================
 
 log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"
 }
 
-get_latest_stage3_url() {
-    log "Getting latest stage3 URL..."
-    wget -q "$STAGE3_BASE_URL/latest-stage3-amd64-openrc.txt" -O /tmp/latest-stage3.txt
-    local stage3_file=$(grep -v '^#' /tmp/latest-stage3.txt | head -n1 | cut -d' ' -f1)
-    echo "$STAGE3_BASE_URL/$stage3_file"
-    rm -f /tmp/latest-stage3.txt
-}
-
-STAGE3_URL=$(get_latest_stage3_url)
-
-log "Starting installation with latest stage3: $(basename $STAGE3_URL)"
+log "Starting installation (standalone, tested flow)"
 
 log "Partitioning disk: $DISK"
 parted --script $DISK \
     mklabel gpt \
     mkpart primary fat32 1MiB $EFI_SIZE \
     set 1 esp on \
-    mkpart primary linux-swap $EFI_SIZE "+$SWAP_SIZE" \
-    mkpart primary ext4 "+$SWAP_SIZE" 100%
+    mkpart primary linux-swap $EFI_SIZE $SWAP_SIZE \
+    mkpart primary ext4 $ROOT_SIZE 100%
 
 log "Formatting partitions"
 mkfs.fat -F 32 $EFI_PART
@@ -77,7 +71,8 @@ MAKEOPTS="-j${MAX_JOBS}"
 
 ACCEPT_LICENSE="*"
 USE="X -wayland -gtk -gtk3 -gtk4 -gnome -kde -plasma -qt5 -qt6 -xfce -mate -lxde -lxqt -jack -bluetooth -cups -avahi -nfs -systemd -dvd -dvdr -cdr"
-GENTOO_MIRRORS="https://distfiles.gentoo.org https://mirror.leaseweb.com/gentoo/ https://mirrors.rit.edu/gentoo/"
+# Official mirrors only (no LAN endpoints)
+GENTOO_MIRRORS="https://distfiles.gentoo.org"
 EOF
 
 log "Preparing chroot environment"
@@ -90,25 +85,29 @@ mount --make-rslave /mnt/gentoo/dev
 mount --bind /run /mnt/gentoo/run
 mount --make-slave /mnt/gentoo/run
 
-# Create chroot installation script
+# Bake config for the chroot script (same variable names as tested flow)
+cat > /mnt/gentoo/config.conf << EOF
+HOSTNAME="$HOSTNAME"
+USERNAME="$USERNAME"
+PASSWORD="$PASSWORD"
+PASSWORD2="$PASSWORD2"
+TIMEZONE="$TIMEZONE"
+LOCALE="$LOCALE"
+KEYMAP="$KEYMAP"
+ROOT_PART="$ROOT_PART"
+EFI_PART="$EFI_PART"
+SWAP_PART="$SWAP_PART"
+DISK="$DISK"
+EOF
+
+# Create chroot installation script (kept close to your tested logic)
 log "Creating chroot installation script"
 cat > /mnt/gentoo/base-install.sh << 'CHROOT_EOF'
 #!/bin/bash
 set -euo pipefail
 
-# Import config variables
-HOSTNAME="${HOSTNAME}"
-USERNAME="${USERNAME}"
-PASSWORD="${PASSWORD}"
-PASSWORD2="${PASSWORD2}"
-TIMEZONE="${TIMEZONE}"
-LOCALE="${LOCALE}"
-KEYMAP="${KEYMAP}"
-ROOT_PART="${ROOT_PART}"
-EFI_PART="${EFI_PART}"
-SWAP_PART="${SWAP_PART}"
-
 source /etc/profile
+source config.conf
 
 log() {
     echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"
@@ -119,10 +118,12 @@ emerge --sync
 
 log "Setting profile"
 eselect profile list
-eselect profile set default/linux/amd64/17.1/desktop
+eselect profile set 21
 
-log "Installing essential tools"
+log "Installing git"
 emerge --ask=n dev-vcs/git
+
+# Use official default gentoo repo (no custom endpoints)
 
 log "Updating @world"
 emerge --ask=n --update --deep --newuse @world
@@ -133,7 +134,7 @@ emerge --config sys-libs/timezone-data
 echo "$LOCALE" >> /etc/locale.gen
 locale-gen
 eselect locale list
-eselect locale set $(eselect locale list | grep "en_US.utf8" | cut -d'[' -f2 | cut -d']' -f1 | head -n1)
+eselect locale set 4
 env-update && source /etc/profile
 
 mkdir -p /etc/portage/package.use
@@ -147,29 +148,30 @@ emerge --ask=n app-portage/cpuid2cpuflags
 
 echo "*/* $(cpuid2cpuflags)" > /etc/portage/package.use/00cpu-flags
 
-log "Installing genfstab"
+log "Installing genfstab (official package)"
 emerge --ask=n sys-fs/genfstab
 
-log "Generating fstab with official genfstab"
+log "Generating fstab with genfstab"
 genfstab -U / > /etc/fstab
 
 log "Configuring hostname and network"
 echo "hostname=$HOSTNAME" > /etc/conf.d/hostname
 cat > /etc/hosts << HOSTS_EOF
-127.0.0.1 $HOSTNAME.localdomain $HOSTNAME localhost
+127.0.0.1 $HOSTNAME
+127.0.0.1 localhost
 ::1       localhost
 HOSTS_EOF
 
-echo "keymap="$KEYMAP"" > /etc/conf.d/keymaps
+echo "keymap=\"$KEYMAP\"" > /etc/conf.d/keymaps
 
 log "Installing base packages"
-emerge --ask=n net-misc/dhcpcd app-admin/sudo app-misc/neofetch sys-boot/grub
+emerge --ask=n dhcpcd sudo neofetch grub efibootmgr
 
 log "Configuring services"
 rc-update add dhcpcd default
 
 log "Installing bootloader"
-grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=Gentoo
+grub-install $DISK
 grub-mkconfig -o /boot/grub/grub.cfg
 
 sed -i 's/^# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
