@@ -1,13 +1,8 @@
 #!/bin/bash
-# Gentoo Linux Base Installation Script - Standalone, tested flow
-
 set -euo pipefail
-
 # ============================================================================
 # CONFIGURATION - EDIT THESE VALUES
 # ============================================================================
-
-# Base Gentoo configuration 
 HOSTNAME="gentoo-base"
 USERNAME="acidking"
 PASSWORD="bep" # Root password
@@ -15,8 +10,6 @@ PASSWORD2="bop" # User password
 TIMEZONE="Europe/Helsinki" # owo
 KEYMAP="en-latin9" # Keyboard layout, colemak
 LOCALE="en_US.UTF-8 UTF-8"
-
-# Disk layout (tested)
 DISK="/dev/vda"
 ROOT_PART="/dev/vda3" # Hello virtual machine user! 
 EFI_PART="/dev/vda1"  # Are you scared of the dark?
@@ -24,11 +17,8 @@ SWAP_PART="/dev/vda2" # ------------------------- #
 ROOT_SIZE="8GiB"
 EFI_SIZE="100Mib" # smol (keep as tested)
 SWAP_SIZE="2GiB"
-
 MAX_JOBS="80" # Number of parallel jobs for emerge
-
-# Fixed, tested stage3 tarball (no auto-detection)
-STAGE3_URL="https://distfiles.gentoo.org/releases/amd64/autobuilds/20250608T165347Z/stage3-amd64-openrc-20250608T165347Z.tar.xz"
+STAGE3_URL="https://distfiles.gentoo.org/releases/amd64/autobuilds/20250921T170345Z/stage3-amd64-openrc-20250921T170345Z.tar.xz"
 
 # ============================================================================
 # MAIN SCRIPT
@@ -85,7 +75,6 @@ mount --make-rslave /mnt/gentoo/dev
 mount --bind /run /mnt/gentoo/run
 mount --make-slave /mnt/gentoo/run
 
-# Bake config for the chroot script (same variable names as tested flow)
 cat > /mnt/gentoo/config.conf << EOF
 HOSTNAME="$HOSTNAME"
 USERNAME="$USERNAME"
@@ -100,7 +89,6 @@ SWAP_PART="$SWAP_PART"
 DISK="$DISK"
 EOF
 
-# Create chroot installation script (kept close to your tested logic)
 log "Creating chroot installation script"
 cat > /mnt/gentoo/base-install.sh << 'CHROOT_EOF'
 #!/bin/bash
